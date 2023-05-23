@@ -1,5 +1,6 @@
 /* Formatted on 5/19/2023 2:41:55 PM (QP5 v5.276) */
 SET SERVEROUTPUT ON;
+--changed by ajhar
 
 DECLARE
     autho_activity_row   autho_activity_adm%ROWTYPE;
