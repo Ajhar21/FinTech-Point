@@ -24,20 +24,20 @@ IS
 
     -- changed the prcedure into function, Jahirul, 22-05-2023
     FUNCTION visa_b2_trailer_gen (
-        bin_number                   VARCHAR2,
-        processing_date              DATE,
-        batch_money_trans_counter    NUMERIC,
-        file_money_trans_counter     NUMERIC,
-        batch_number                 NUMERIC,
-        file_number                  NUMERIC,
+        p_bin_number                   VARCHAR2,
+        p_processing_date              DATE,
+        p_batch_money_trans_counter    NUMERIC,
+        p_file_money_trans_counter     NUMERIC,
+        p_batch_number                 NUMERIC,
+        p_file_number                  NUMERIC,
         --trx_counter                  NUMERIC,
-        batch_tcr_count              NUMERIC,
-        file_tcr_count               NUMERIC,
-        center_batch_id              VARCHAR2,
-        batch_trans_counter          NUMERIC,
-        file_trans_counter           NUMERIC,
-        batch_trans_amount_sum       autho_activity_adm.transaction_amount%TYPE,
-        file_trans_amount_sum        autho_activity_adm.transaction_amount%TYPE)
+        p_batch_tcr_count              NUMERIC,
+        p_file_tcr_count               NUMERIC,
+        p_center_batch_id              VARCHAR2,
+        p_batch_trans_counter          NUMERIC,
+        p_file_trans_counter           NUMERIC,
+        p_batch_trans_amount_sum       autho_activity_adm.transaction_amount%TYPE,
+        p_file_trans_amount_sum        autho_activity_adm.transaction_amount%TYPE)
         RETURN VARCHAR2;
 END visa_base2_generator;
 /*END FP_TEAM 20230519 */
@@ -132,19 +132,19 @@ IS
 
             tc_05_91_and_92_string :=
                 visa_base2_generator.visa_b2_trailer_gen (
-                    bin_number                  => '432326',
-                    processing_date             => SYSDATE - 1,
-                    batch_money_trans_counter   => 20,
-                    file_money_trans_counter    => 18,
-                    batch_number                => 6,
-                    file_number                 => 1,
-                    batch_tcr_count             => 60,
-                    file_tcr_count              => file_tcr_count_flag,
-                    center_batch_id             => ' ',
-                    batch_trans_counter         => 30,
-                    file_trans_counter          => trx_counter_m,
-                    batch_trans_amount_sum      => 400000,
-                    file_trans_amount_sum       => file_trans_amount_sum_m);
+                    p_bin_number                  => '432326',
+                    p_processing_date             => SYSDATE - 1,
+                    p_batch_money_trans_counter   => 20,
+                    p_file_money_trans_counter    => 18,
+                    p_batch_number                => 6,
+                    p_file_number                 => 1,
+                    p_batch_tcr_count             => 60,
+                    p_file_tcr_count              => file_tcr_count_flag,
+                    p_center_batch_id             => ' ',
+                    p_batch_trans_counter         => 30,
+                    p_file_trans_counter          => trx_counter_m,
+                    p_batch_trans_amount_sum      => 400000,
+                    p_file_trans_amount_sum       => file_trans_amount_sum_m);
             DBMS_OUTPUT.put_line (tc_05_91_and_92_string);
 
             CLOSE base_2_genarator;
@@ -405,101 +405,101 @@ IS
     /*START FP_JAHIR 20230519 - 2205203: changed into function*/
 
     FUNCTION visa_b2_trailer_gen (
-        bin_number                   VARCHAR2,
-        processing_date              DATE,
-        batch_money_trans_counter    NUMERIC,
-        file_money_trans_counter     NUMERIC,
-        batch_number                 NUMERIC,
-        file_number                  NUMERIC,
+        p_bin_number                   VARCHAR2,
+        p_processing_date              DATE,
+        p_batch_money_trans_counter    NUMERIC,
+        p_file_money_trans_counter     NUMERIC,
+        p_batch_number                 NUMERIC,
+        p_file_number                  NUMERIC,
         --trx_counter                  NUMERIC,
-        batch_tcr_count              NUMERIC,
-        file_tcr_count               NUMERIC,
-        center_batch_id              VARCHAR2,
-        batch_trans_counter          NUMERIC,
-        file_trans_counter           NUMERIC,
-        batch_trans_amount_sum       autho_activity_adm.transaction_amount%TYPE,
-        file_trans_amount_sum        autho_activity_adm.transaction_amount%TYPE)
+        p_batch_tcr_count              NUMERIC,
+        p_file_tcr_count               NUMERIC,
+        p_center_batch_id              VARCHAR2,
+        p_batch_trans_counter          NUMERIC,
+        p_file_trans_counter           NUMERIC,
+        p_batch_trans_amount_sum       autho_activity_adm.transaction_amount%TYPE,
+        p_file_trans_amount_sum        autho_activity_adm.transaction_amount%TYPE)
         RETURN VARCHAR2
     IS
-        tcr91_trans_code              VARCHAR2 (2) := '91';
-        tcr92_trans_code              VARCHAR2 (2) := '92';
-        trans_code_qualifier          VARCHAR2 (1) := '0';
-        trans_comp_seq_number         VARCHAR2 (1) := '0';
-        v_bin_number                  VARCHAR2 (6) := LPAD (bin_number, 6);
+        v_tcr91_trans_code              VARCHAR2 (2) := '91';
+        v_tcr92_trans_code              VARCHAR2 (2) := '92';
+        v_trans_code_qualifier          VARCHAR2 (1) := '0';
+        v_trans_comp_seq_number         VARCHAR2 (1) := '0';
+        v_bin_number                  VARCHAR2 (6) := LPAD (p_bin_number, 6);
         v_processing_date             VARCHAR2 (5)
-            := LPAD (TO_CHAR (processing_date, 'YYDDD'), 5);
-        tcr91_data                    VARCHAR2 (168);
-        tcr92_data                    VARCHAR2 (168);
-        dest_amount                   VARCHAR2 (15) := LPAD (0, 15, '0');
+            := LPAD (TO_CHAR (p_processing_date, 'YYDDD'), 5);
+        v_tcr91_data                    VARCHAR2 (168);
+        v_tcr92_data                    VARCHAR2 (168);
+        v_dest_amount                   VARCHAR2 (15) := LPAD (0, 15, '0');
         v_batch_money_trans_counter   VARCHAR2 (12)
-            := LPAD (TO_CHAR (NVL (batch_money_trans_counter, 0)), 12, '0');
+            := LPAD (TO_CHAR (NVL (p_batch_money_trans_counter, 0)), 12, '0');
         v_file_money_trans_counter    VARCHAR2 (12)
-            := LPAD (TO_CHAR (NVL (file_money_trans_counter, 0)), 12, '0');
+            := LPAD (TO_CHAR (NVL (p_file_money_trans_counter, 0)), 12, '0');
         v_batch_number                VARCHAR2 (6)
-            := LPAD (TO_CHAR (batch_number), 6, '0');
+            := LPAD (TO_CHAR (p_batch_number), 6, '0');
         v_file_number                 VARCHAR2 (6)
-            := LPAD (TO_CHAR (file_number), 6, '0');
+            := LPAD (TO_CHAR (p_file_number), 6, '0');
         v_batch_tcr_counter           VARCHAR2 (12)
-            := LPAD (TO_CHAR (batch_tcr_count), 12, '0');
+            := LPAD (TO_CHAR (p_batch_tcr_count), 12, '0');
         v_file_tcr_counter            VARCHAR2 (12)
-            := LPAD (TO_CHAR (file_tcr_count), 12, '0');
-        reserved_se1                  VARCHAR2 (6) := '      ';
+            := LPAD (TO_CHAR (p_file_tcr_count), 12, '0');
+        v_reserved_se1                  VARCHAR2 (6) := '      ';
         v_center_batch_id             VARCHAR2 (8) := '        ';
         v_batch_trans_counter         VARCHAR2 (9)
-            := LPAD (NVL (batch_trans_counter, 0), 9, 0);
+            := LPAD (NVL (p_batch_trans_counter, 0), 9, 0);
         v_file_trans_counter          VARCHAR2 (9)
-            := LPAD (NVL (file_trans_counter, 0), 9, 0);
-        reserved_se2                  VARCHAR2 (18) := '                  ';
+            := LPAD (NVL (p_file_trans_counter, 0), 9, 0);
+        v_reserved_se2                  VARCHAR2 (18) := '                  ';
         v_batch_trans_amount_sum      VARCHAR2 (15)
-            := LPAD (NVL (batch_trans_amount_sum * 100, 0), 15, 0);
+            := LPAD (NVL (p_batch_trans_amount_sum * 100, 0), 15, 0);
         v_file_trans_amount_sum       VARCHAR2 (15)
-            := LPAD (NVL (file_trans_amount_sum * 100, 0), 15, 0);
-        reserved_se3                  VARCHAR2 (15) := '               ';
-        reserved_se4                  VARCHAR2 (15) := '               ';
-        reserved_se5                  VARCHAR2 (15) := '               ';
-        reserved_se6                  VARCHAR2 (7) := '       ';
+            := LPAD (NVL (p_file_trans_amount_sum * 100, 0), 15, 0);
+        v_reserved_se3                  VARCHAR2 (15) := '               ';
+       v_reserved_se4                  VARCHAR2 (15) := '               ';
+        v_reserved_se5                  VARCHAR2 (15) := '               ';
+        v_reserved_se6                  VARCHAR2 (7) := '       ';
     BEGIN
-        tcr91_data :=
-               tcr91_trans_code
-            || trans_code_qualifier
-            || trans_comp_seq_number
+        v_tcr91_data :=
+               v_tcr91_trans_code
+            || v_trans_code_qualifier
+            || v_trans_comp_seq_number
             || v_bin_number
             || v_processing_date                                          -- V
-            || dest_amount                                                -- V
+            || v_dest_amount                                                -- V
             || v_batch_money_trans_counter                                -- V
             || v_batch_number
             || v_batch_tcr_counter
-            || reserved_se1
+            || v_reserved_se1
             || v_center_batch_id
             || v_batch_trans_counter
-            || reserved_se2
+            || v_reserved_se2
             || v_batch_trans_amount_sum
-            || reserved_se3
-            || reserved_se4
-            || reserved_se5
-            || reserved_se6;
+            || v_reserved_se3
+            || v_reserved_se4
+            || v_reserved_se5
+            || v_reserved_se6;
 
-        tcr92_data :=
-               tcr92_trans_code
-            || trans_code_qualifier
-            || trans_comp_seq_number
+        v_tcr92_data :=
+               v_tcr92_trans_code
+            || v_trans_code_qualifier
+            || v_trans_comp_seq_number
             || v_bin_number
             || v_processing_date
-            || dest_amount
+            || v_dest_amount
             || v_file_money_trans_counter
             || v_file_number
             || v_file_tcr_counter
-            || reserved_se1
+            || v_reserved_se1
             || v_center_batch_id
             || v_file_trans_counter
-            || reserved_se2
+            || v_reserved_se2
             || v_file_trans_amount_sum
-            || reserved_se3
-            || reserved_se4
-            || reserved_se5
-            || reserved_se6;
+            || v_reserved_se3
+            || v_reserved_se4
+            || v_reserved_se5
+            || v_reserved_se6;
 
-        RETURN tcr91_data || CHR (10) || tcr92_data;
+        RETURN v_tcr91_data || CHR (10) || v_tcr92_data;
     END visa_b2_trailer_gen;
 /*END FP_JAHIR 20230519 */
 END visa_base2_generator;
