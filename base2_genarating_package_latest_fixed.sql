@@ -13,13 +13,13 @@ IS
     FUNCTION tc_05_tcr_0 (p_autho_activity_row autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2;
 
-    FUNCTION tc05_tcr01 (rowtype_variable2 autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr01 (p_rowtype_variable2 autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2;
 
-    FUNCTION tc05_tcr05 (rowtype_variable autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr05 (p_rowtype_variable autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2;
 
-    FUNCTION tc05_tcr7 (rowtype_variable autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr7 (p_rowtype_variable autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2;
 
     -- changed the prcedure into function, Jahirul, 22-05-2023
@@ -74,8 +74,8 @@ IS
                     header_string        VARCHAR2 (168);
                     tc_05_tcr_0_string   VARCHAR2 (168);
                     tc_05_tcr_1_string   VARCHAR2 (168);
-                    tc05_tcr5_string     VARCHAR2 (168);
-                    tc05_tcr7_string     VARCHAR2 (168);
+                    v_tc5_tcr5_print     VARCHAR2 (168);
+                    v_tc5_tcr7_print     VARCHAR2 (168);
                 BEGIN
                     IF autho_activity_row.action_code = '000'
                     THEN
@@ -113,18 +113,18 @@ IS
                             visa_base2_generator.tc05_tcr01 (
                                 autho_activity_row);
                         DBMS_OUTPUT.put_line (tc_05_tcr_1_string);
-                        tc05_tcr5_string :=
+                        v_tc5_tcr5_print :=
                             visa_base2_generator.tc05_tcr05 (
                                 autho_activity_row);
-                        DBMS_OUTPUT.put_line (tc05_tcr5_string);
-                        tc05_tcr7_string :=
+                        DBMS_OUTPUT.put_line (v_tc5_tcr5_print);
+                        v_tc5_tcr7_print :=
                             visa_base2_generator.tc05_tcr7 (
                                 autho_activity_row);
 
                         IF autho_activity_row.chip_application_cryptogram
                                IS NOT NULL
                         THEN
-                            DBMS_OUTPUT.put_line (tc05_tcr7_string);
+                            DBMS_OUTPUT.put_line (v_tc5_tcr7_print);
                         END IF;
                     END IF;
                 END;
@@ -266,7 +266,7 @@ IS
     /*END FP_AJHAR 20230519 */
 
     /*START FP_ANOY 20230519 */
-    FUNCTION tc05_tcr01 (rowtype_variable2 autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr01 (p_rowtype_variable2 autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2
     IS
         tc05_tcr01_print   VARCHAR2 (168);
@@ -284,12 +284,12 @@ IS
              || '   '
              || ' '
              || ' '
-             || RPAD (rowtype_variable2.card_acceptor_id, 15, ' ')
-             || LPAD (rowtype_variable2.private_data_1, 8, ' ')
+             || RPAD (p_rowtype_variable2.card_acceptor_id, 15, ' ')
+             || LPAD (p_rowtype_variable2.private_data_1, 8, ' ')
              || '000000000000'
              || ' '
              || ' '
-             || RPAD (TO_CHAR (rowtype_variable2.business_date, 'YDDD'),
+             || RPAD (TO_CHAR (p_rowtype_variable2.business_date, 'YDDD'),
                       6,
                       '0')             --CENTRAL PROCESSING DATE/BUSINESS_DATE
              || ' '
@@ -310,33 +310,33 @@ IS
     /*END FP_ANOY 20230519 */
 
     /*START FP_SHAKIL 20230519 */
-    FUNCTION tc05_tcr05 (rowtype_variable autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr05 (p_rowtype_variable autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2
     IS
-        tc05_tcr05_l3_print   VARCHAR2 (168);
-        eci_07                VARCHAR2 (2);
+        v_tc05_tcr05_string   VARCHAR2 (168);
+        v_eci_07                VARCHAR2 (2);
     /*ACTION_CODE=000 approved , else declined; /// processing code=90 e_com Transaction*/
     BEGIN
-        IF     rowtype_variable.action_code = '000'
-           AND rowtype_variable.processing_code = '90'
+        IF     p_rowtype_variable.action_code = '000'
+           AND p_rowtype_variable.processing_code = '90'
         THEN
-            eci_07 := '07';         --Transaction approved & E_COM Transaction
+            v_eci_07 := '07';         --Transaction approved & E_COM Transaction
         ELSE
-            eci_07 := '  ';
+            v_eci_07 := '  ';
         END IF;
 
-        tc05_tcr05_l3_print :=
+        v_tc05_tcr05_string :=
             (   '0505'
              || '586213531861029'
-             || LPAD (TRUNC (100 * (rowtype_variable.transaction_amount)),
+             || LPAD (TRUNC (100 * (p_rowtype_variable.transaction_amount)),
                       12,
                       '0')
-             || LPAD (rowtype_variable.transaction_currency, 3, ' ')
+             || LPAD (p_rowtype_variable.transaction_currency, 3, ' ')
              || '          0000 '
              || '000000000000'
              || 'N'
              || '                 '
-             || LPAD (eci_07, 2, ' ')
+             || LPAD (v_eci_07, 2, ' ')
              || '          '
              || '000000000000000'
              || ' '
@@ -346,45 +346,45 @@ IS
              || 'N       '
              || '      0000000000000000  '
              || ' ');
-        RETURN tc05_tcr05_l3_print;
+        RETURN v_tc05_tcr05_string;
     END tc05_tcr05;
 
     /*END FP_SHAKIL 20230519 */
 
     /*START FP_SHAKIL 20230519 */
-    FUNCTION tc05_tcr7 (rowtype_variable autho_activity_adm%ROWTYPE)
+    FUNCTION tc05_tcr7 (p_rowtype_variable autho_activity_adm%ROWTYPE)
         RETURN VARCHAR2
     IS
-        tc05_tcr07_l3_print   VARCHAR2 (168);
+        v_tc05_tcr07_string   VARCHAR2 (168);
     BEGIN
-        tc05_tcr07_l3_print :=
+        v_tc05_tcr07_string :=
             (   '05'
              || '07'
-             || LPAD (NVL (rowtype_variable.processing_code, '0'), 2, '0')
-             || LPAD (NVL (rowtype_variable.card_sequence_number, '0'),
+             || LPAD (NVL (p_rowtype_variable.processing_code, '0'), 2, '0')
+             || LPAD (NVL (p_rowtype_variable.card_sequence_number, '0'),
                       3,
                       '0')
-             || LPAD (NVL (rowtype_variable.chip_transaction_date, '0'),
+             || LPAD (NVL (p_rowtype_variable.chip_transaction_date, '0'),
                       6,
                       '0')
-             || LPAD (NVL (rowtype_variable.chip_terminal_capability, '0'),
+             || LPAD (NVL (p_rowtype_variable.chip_terminal_capability, '0'),
                       6,
                       '0')
              || LPAD (
                     NVL (
                         TRIM (
-                            LEADING '0' FROM rowtype_variable.chip_terminal_country_code),
+                            LEADING '0' FROM p_rowtype_variable.chip_terminal_country_code),
                         '0'),
                     3,
                     '0')
              || '        '
-             || LPAD (NVL (rowtype_variable.chip_unpredictable_number, '0'),
+             || LPAD (NVL (p_rowtype_variable.chip_unpredictable_number, '0'),
                       8,
                       '0')
              || '0005'
              || '7C00'
              || LPAD (
-                    NVL (rowtype_variable.chip_application_cryptogram, '0'),
+                    NVL (p_rowtype_variable.chip_application_cryptogram, '0'),
                     16,
                     '0')
              || '01'
@@ -399,7 +399,7 @@ IS
              || '                              '
              || '        '
              || '          ');
-        RETURN tc05_tcr07_l3_print;
+        RETURN v_tc05_tcr07_string;
     END tc05_tcr7;                                 /*END FP_SHAKIL 20230519 */
 
     /*START FP_JAHIR 20230519 - 2205203: changed into function*/
