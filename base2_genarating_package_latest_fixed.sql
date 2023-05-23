@@ -498,7 +498,7 @@ IS
             || v_reserved_se4
             || v_reserved_se5
             || v_reserved_se6;
-
+-- new comment
         RETURN v_tcr91_data || CHR (10) || v_tcr92_data;
     END visa_b2_trailer_gen;
 /*END FP_JAHIR 20230519 */
