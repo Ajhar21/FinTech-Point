@@ -70,3 +70,6 @@ BEGIN
 
     CLOSE base_2_genarator;
 END;
+
+
+--hduvhsk
