@@ -66,7 +66,7 @@ IS
                 SELECT *
                   FROM autho_activity_adm
                  WHERE reference_number IN (SELECT rrn
-                                              FROM base2_gen_rrn);
+                                              FROM base2_in);
         BEGIN
             OPEN cur_base_2_genarator;
 
