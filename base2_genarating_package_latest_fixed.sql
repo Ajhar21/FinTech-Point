@@ -139,15 +139,16 @@ IS
                     p_batch_number                => 6,
                     p_file_number                 => 1,
                     p_batch_tcr_count             => 60,
-                    p_file_tcr_count              => v_file_tcr_count_flag,
+                    p_file_tcr_count              => file_tcr_count_flag,
                     p_center_batch_id             => ' ',
                     p_batch_trans_counter         => 30,
-                    p_file_trans_counter          => v_trx_counter_m,
+                    p_file_trans_counter          => trx_counter_m,
                     p_batch_trans_amount_sum      => 400000,
-                    p_file_trans_amount_sum       => v_file_trans_amount_sum_m);
-            DBMS_OUTPUT.put_line (v_tc_05_91_and_92_string);
+                    p_file_trans_amount_sum       => file_trans_amount_sum_m);
+            DBMS_OUTPUT.put_line (tc_05_91_and_92_string);
 
-            CLOSE cur_base_2_genarator;
+            CLOSE base_2_genarator;
+
         END;
     END generating_base2;
 
