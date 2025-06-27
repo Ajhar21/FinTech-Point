@@ -1,7 +1,9 @@
-/* Formatted on 22-May-2023 20:31:48 (QP5 v5.276) */
+/* Formatted on 23-May-2023 15:24:05 (QP5 v5.276) */
 -- SET SERVEROUTPUT ON;
 -- abcdefgs
+
 /*START FP_TEAM 20230519 */
+
 CREATE OR REPLACE PACKAGE visa_base2_generator
 IS
     PROCEDURE generating_base2;
@@ -61,7 +63,10 @@ IS
 
             CURSOR cur_base_2_genarator
             IS
-                SELECT * FROM autho_activity_adm;
+                SELECT *
+                  FROM autho_activity_adm
+                 WHERE reference_number IN (SELECT rrn
+                                              FROM base2_in);
         BEGIN
             OPEN cur_base_2_genarator;
 
@@ -139,16 +144,15 @@ IS
                     p_batch_number                => 6,
                     p_file_number                 => 1,
                     p_batch_tcr_count             => 60,
-                    p_file_tcr_count              => file_tcr_count_flag,
+                    p_file_tcr_count              => v_file_tcr_count_flag,
                     p_center_batch_id             => ' ',
                     p_batch_trans_counter         => 30,
-                    p_file_trans_counter          => trx_counter_m,
+                    p_file_trans_counter          => v_trx_counter_m,
                     p_batch_trans_amount_sum      => 400000,
-                    p_file_trans_amount_sum       => file_trans_amount_sum_m);
-            DBMS_OUTPUT.put_line (tc_05_91_and_92_string);
+                    p_file_trans_amount_sum       => v_file_trans_amount_sum_m);
+            DBMS_OUTPUT.put_line (v_tc_05_91_and_92_string);
 
-            CLOSE base_2_genarator;
-
+            CLOSE cur_base_2_genarator;
         END;
     END generating_base2;
 
@@ -200,7 +204,7 @@ IS
             || 'Z'                                     --Floor_Limit_Indicator
             || ' '                              --CRB/Exception_File_Indicator
             || 'N' --Positive_Cardholder_Authorization_Service_(PCAS)_Indicator
-            || LPAD (v_acq_ref_num, 23, ' ')         --Acquirer_Reference_Number
+            || LPAD (v_acq_ref_num, 23, ' ')       --Acquirer_Reference_Number
             || '00000000'                             --Acquirer�s_Business_ID
             || TO_CHAR (p_autho_activity_row.transaction_local_date, 'MMDD') --Purchase_Date_(MMDD)
             || LPAD (p_autho_activity_row.billing_amount * 100, 12, '0') --Destination_Amount
@@ -315,13 +319,13 @@ IS
         RETURN VARCHAR2
     IS
         v_tc05_tcr05_string   VARCHAR2 (168);
-        v_eci_07                VARCHAR2 (2);
+        v_eci_07              VARCHAR2 (2);
     /*ACTION_CODE=000 approved , else declined; /// processing code=90 e_com Transaction*/
     BEGIN
         IF     p_rowtype_variable.action_code = '000'
            AND p_rowtype_variable.processing_code = '90'
         THEN
-            v_eci_07 := '07';         --Transaction approved & E_COM Transaction
+            v_eci_07 := '07';       --Transaction approved & E_COM Transaction
         ELSE
             v_eci_07 := '  ';
         END IF;
@@ -379,9 +383,10 @@ IS
                     3,
                     '0')
              || '        '
-             || LPAD (NVL (p_rowtype_variable.chip_unpredictable_number, '0'),
-                      8,
-                      '0')
+             || LPAD (
+                    NVL (p_rowtype_variable.chip_unpredictable_number, '0'),
+                    8,
+                    '0')
              || '0005'
              || '7C00'
              || LPAD (
@@ -422,16 +427,16 @@ IS
         p_file_trans_amount_sum        autho_activity_adm.transaction_amount%TYPE)
         RETURN VARCHAR2
     IS
-        v_tcr91_trans_code              VARCHAR2 (2) := '91';
-        v_tcr92_trans_code              VARCHAR2 (2) := '92';
-        v_trans_code_qualifier          VARCHAR2 (1) := '0';
-        v_trans_comp_seq_number         VARCHAR2 (1) := '0';
+        v_tcr91_trans_code            VARCHAR2 (2) := '91';
+        v_tcr92_trans_code            VARCHAR2 (2) := '92';
+        v_trans_code_qualifier        VARCHAR2 (1) := '0';
+        v_trans_comp_seq_number       VARCHAR2 (1) := '0';
         v_bin_number                  VARCHAR2 (6) := LPAD (p_bin_number, 6);
         v_processing_date             VARCHAR2 (5)
             := LPAD (TO_CHAR (p_processing_date, 'YYDDD'), 5);
-        v_tcr91_data                    VARCHAR2 (168);
-        v_tcr92_data                    VARCHAR2 (168);
-        v_dest_amount                   VARCHAR2 (15) := LPAD (0, 15, '0');
+        v_tcr91_data                  VARCHAR2 (168);
+        v_tcr92_data                  VARCHAR2 (168);
+        v_dest_amount                 VARCHAR2 (15) := LPAD (0, 15, '0');
         v_batch_money_trans_counter   VARCHAR2 (12)
             := LPAD (TO_CHAR (NVL (p_batch_money_trans_counter, 0)), 12, '0');
         v_file_money_trans_counter    VARCHAR2 (12)
@@ -444,21 +449,21 @@ IS
             := LPAD (TO_CHAR (p_batch_tcr_count), 12, '0');
         v_file_tcr_counter            VARCHAR2 (12)
             := LPAD (TO_CHAR (p_file_tcr_count), 12, '0');
-        v_reserved_se1                  VARCHAR2 (6) := '      ';
+        v_reserved_se1                VARCHAR2 (6) := '      ';
         v_center_batch_id             VARCHAR2 (8) := '        ';
         v_batch_trans_counter         VARCHAR2 (9)
             := LPAD (NVL (p_batch_trans_counter, 0), 9, 0);
         v_file_trans_counter          VARCHAR2 (9)
             := LPAD (NVL (p_file_trans_counter, 0), 9, 0);
-        v_reserved_se2                  VARCHAR2 (18) := '                  ';
+        v_reserved_se2                VARCHAR2 (18) := '                  ';
         v_batch_trans_amount_sum      VARCHAR2 (15)
             := LPAD (NVL (p_batch_trans_amount_sum * 100, 0), 15, 0);
         v_file_trans_amount_sum       VARCHAR2 (15)
             := LPAD (NVL (p_file_trans_amount_sum * 100, 0), 15, 0);
-        v_reserved_se3                  VARCHAR2 (15) := '               ';
-       v_reserved_se4                  VARCHAR2 (15) := '               ';
-        v_reserved_se5                  VARCHAR2 (15) := '               ';
-        v_reserved_se6                  VARCHAR2 (7) := '       ';
+        v_reserved_se3                VARCHAR2 (15) := '               ';
+        v_reserved_se4                VARCHAR2 (15) := '               ';
+        v_reserved_se5                VARCHAR2 (15) := '               ';
+        v_reserved_se6                VARCHAR2 (7) := '       ';
     BEGIN
         v_tcr91_data :=
                v_tcr91_trans_code
@@ -466,7 +471,7 @@ IS
             || v_trans_comp_seq_number
             || v_bin_number
             || v_processing_date                                          -- V
-            || v_dest_amount                                                -- V
+            || v_dest_amount                                              -- V
             || v_batch_money_trans_counter                                -- V
             || v_batch_number
             || v_batch_tcr_counter
@@ -499,7 +504,7 @@ IS
             || v_reserved_se4
             || v_reserved_se5
             || v_reserved_se6;
--- new comment
+        -- new comment
         RETURN v_tcr91_data || CHR (10) || v_tcr92_data;
     END visa_b2_trailer_gen;
 /*END FP_JAHIR 20230519 */
